@@ -6,22 +6,33 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 14:49:21 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/14 15:16:35 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/01/26 04:08:32 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/philo.h"
+#include "philo.h"
 
-int	ft_atoi(char *str)	{
-	int	dest;
-	int	i;
-	
-	dest = 0;
+long	ft_atoi(const char *str)
+{
+	int		i;
+	int		sign;
+	long	res;
+
 	i = 0;
-	while (str[i])
+	sign = 1;
+	res = 0;
+	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
+		i++;
+	if (str[i] == '+' || str[i] == '-')
 	{
-		dest = dest * 10 + (str[i] - '0');
+		if (str[i] == '-')
+			sign *= -1;
 		i++;
 	}
-	return (dest);
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		res = res * 10 + (str[i] - 48);
+		i++;
+	}
+	return (res * sign);
 }

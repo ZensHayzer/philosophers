@@ -1,26 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   treads_start.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/14 11:59:43 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/26 08:14:30 by ajeanne          ###   ########.fr       */
+/*   Created: 2023/01/26 04:48:56 by ajeanne           #+#    #+#             */
+/*   Updated: 2023/01/26 08:12:18 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philo.h"
+#include "philo.h"
 
-int	main(int argc, char **argv)
+void	threads_start(t_philo *philo, t_data data)
 {
-	t_data	data;
-	t_philo	*philo;
+	int	i;
 
-	if (argc > 4 && argc < 6 && !check_entry(argv))
+	i = 0;
+	while (i < data.nb_philo)
 	{
-		init_data(argv, data);
-		
+		pthread_create(&)
 	}
-	return (EXIT_FAILURE);
+	
 }

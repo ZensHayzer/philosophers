@@ -6,25 +6,31 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 14:54:44 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/14 15:20:51 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/01/26 04:16:02 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/philo.h"
+#include "philo.h"
 
-int	is_nb(char *entry)
+int	isok_nb(char *nb)
 {
 	int	i;
 
 	i = 0;
-	while (entry[i])
-	{
-		if (i > 9)
-			return (EXIT_FAILURE);
-		if (entry[i] < '0' || entry[i] > '9')
-			return (EXIT_FAILURE);
+	while ((nb[i] >= 9 && nb[i] <= 13) || nb[i] == 32)
 		i++;
-	}
+	if (nb[i] == '+' || nb[i] == '-')
+		i++;
+	if (nb[i] < '0' || nb[i] > '9')
+		return (EXIT_FAILURE);
+	while (nb[i] >= '0' && nb[i] <= '9')
+		i++;
+	if (nb[i])
+		return (EXIT_FAILURE);
+	if (ft_atoi(nb) > INT_MAX || ft_atoi(nb) < INT_MIN)
+		return (EXIT_FAILURE);
+	if (ft_atoi(nb) < 1)
+		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
 
@@ -35,7 +41,7 @@ int	check_entry(char **input)
 	i = 1;
 	while (input[i])
 	{
-		if (is_nb)
+		if (isok_nb(input[i]))
 			return (EXIT_FAILURE);
 		i++;
 	}
