@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 14:54:44 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/26 04:16:02 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/01/31 17:59:18 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,13 @@ int	isok_nb(char *nb)
 	return (EXIT_SUCCESS);
 }
 
+int	is_under_200(char *nb)
+{
+	if (atoi(nb) > 200)
+		return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
+}
+
 int	check_entry(char **input)
 {
 	int	i;
@@ -41,7 +48,11 @@ int	check_entry(char **input)
 	i = 1;
 	while (input[i])
 	{
+		if (!input[i])
+			return (EXIT_FAILURE);
 		if (isok_nb(input[i]))
+			return (EXIT_FAILURE);
+		if (is_under_200(input[i]) && i == 1)
 			return (EXIT_FAILURE);
 		i++;
 	}

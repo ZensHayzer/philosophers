@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 11:59:43 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/26 08:14:30 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/01/31 19:12:40 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 int	main(int argc, char **argv)
 {
 	t_data	data;
-	t_philo	*philo;
 
-	if (argc > 4 && argc < 6 && !check_entry(argv))
+	if (argc > 4 && argc < 7 && !check_entry(argv))
 	{
-		init_data(argv, data);
-		
+		if (initialization(argv, &data))
+			return (EXIT_FAILURE);
+		threads_start(data);
 	}
 	return (EXIT_FAILURE);
 }
