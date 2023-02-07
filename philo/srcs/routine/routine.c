@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 11:09:25 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/31 22:51:47 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/06 19:49:06 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,6 @@ void	state(t_philo *philo, int s)
 		printf("%ld PHILOSOPHER %d IS THINKING\n", (gettime() - philo->data->start), philo->id);
 	else if (s == 4)
 		printf("%ld PHILOSOPHER %d IS EATING\n", (gettime() - philo->data->start), philo->id);
-	else if (s == 5)
-		printf("%ld PHILOSOPHER %d IS DEAD\n", (gettime() - philo->data->start), philo->id);
 	pthread_mutex_unlock(&philo->data->write);
 }
 
@@ -48,7 +46,7 @@ int	is_deadqm(t_philo *philo)
 		return (1);
 	else if ((gettime() - philo->last_eat) > philo->data->t_die)
 	{
-		state(philo, 5);
+		state_dead(philo);
 		pthread_mutex_lock(&philo->data->dead_phil);
 		philo->data->is_dead = 1;
 		pthread_mutex_unlock(&philo->data->dead_phil);
@@ -89,7 +87,7 @@ void	*routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (philo->nb_eated != philo->data->t_must_eat && !(philo->data->is_dead))
+	while ((philo->data->t_must_eat != 0 && philo->nb_eated != philo->data->t_must_eat) || !(philo->data->is_dead))
 	{
 		if (philo->id % 2 && !(philo->nb_eated))
 			usleep(philo->data->t_eat * 1000);

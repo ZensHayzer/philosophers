@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 12:01:48 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/01/31 19:13:01 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/06 16:53:11 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,8 @@ void	threads_start(t_data data);
 
 // routine/routine
 void	*routine(void *arg);
+
+// routine/dead_checker
+void	*dead_checker(void *arg);
+void	state_dead(t_philo *philo);
 #endif
