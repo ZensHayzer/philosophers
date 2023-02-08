@@ -6,7 +6,7 @@
 #    By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/01/30 20:34:23 by ajeanne           #+#    #+#              #
-#    Updated: 2023/02/06 16:30:33 by ajeanne          ###   ########.fr        #
+#    Updated: 2023/02/08 18:50:10 by ajeanne          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,10 +25,12 @@ OBJS = $(addprefix $(OBJS_DIR)/, $(SRCS:%.c=%.o))
 SRCS =		main.c			\
 			check_entry.c	\
 			init.c			\
+			init1.c			\
 			routine.c		\
 			dead_checker.c	\
 			threads_start.c	\
-			utils.c
+			utils.c			\
+			free.c
 
 CC =		clang
 CFLAGS =	-Wall -Werror -Wextra -g3
