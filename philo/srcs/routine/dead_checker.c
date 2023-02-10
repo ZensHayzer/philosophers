@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/03 16:05:01 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/08 19:07:31 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/10 23:53:34 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ void	dead_printer(t_data *data)
 	i = 0;
 	while (i < data->nb_philo)
 	{
+		pthread_mutex_lock(&data->ate[i]);
 		if (((gettime() - data->start) - data->philo_tab[i].last_eat)
 		> data->t_die && !(data->is_dead))
 		{
@@ -58,8 +59,12 @@ void	dead_printer(t_data *data)
 			printf("%ld PHILOSOPHER %d IS DEAD\n",
 			(gettime() - data->start), data->philo_tab[i].id);
 			pthread_mutex_unlock(&data->write);
+
+			pthread_mutex_lock(&data->dead_phil);
 			data->is_dead = 1;
+			pthread_mutex_unlock(&data->dead_phil);
 		}
+		pthread_mutex_unlock(&data->ate[i]);
 		i++;
 	}
 }
@@ -72,6 +77,7 @@ void	*dead_checker(void *arg)
 	while (!philo_dead(data) && (!(data->t_must_eat) || !all_ate(data)))
 	{
 		dead_printer(data);
+		usleep(500);
 	}
 	return (NULL);
 }

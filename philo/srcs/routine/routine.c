@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 11:09:25 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/08 19:11:17 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/11 00:47:22 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,15 @@
 
 void	unlock(t_philo *philo)
 {
-	if (philo->id != philo->data->nb_philo)
+	if (philo->id == philo->data->nb_philo)
 	{
+		pthread_mutex_unlock(&philo->data->forks[0]);
 		pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
-		pthread_mutex_unlock(&philo->data->forks[philo->id]);
 	}
 	else
 	{
 		pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
-		pthread_mutex_unlock(&philo->data->forks[0]);
+		pthread_mutex_unlock(&philo->data->forks[philo->id]);
 	}
 }
 
@@ -59,30 +59,36 @@ int	is_deadqm(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->data->dead_phil);
 	if (philo->data->is_dead)
-		return (1);
+		return (pthread_mutex_unlock(&philo->data->dead_phil), 1);
 	pthread_mutex_unlock(&philo->data->dead_phil);
 	return (0);
 }
 
 int	lock(t_philo *philo)
 {
-	if (philo->id != philo->data->nb_philo)
-	{
-		pthread_mutex_lock(&philo->data->forks[philo->id - 1]);
-		if (state(philo, 1))
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id - 1]), 1);
-		pthread_mutex_lock(&philo->data->forks[philo->id]);
-		if (state(philo, 1))
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id]), 1);
-	}
-	else
+	if (philo->id == philo->data->nb_philo)
 	{
 		pthread_mutex_lock(&philo->data->forks[philo->id - 1]);
 		if (state(philo, 1))
 			return (pthread_mutex_unlock(&philo->data->forks[philo->id - 1]), 1);
 		pthread_mutex_lock(&philo->data->forks[0]);
 		if (state(philo, 1))
-			return (pthread_mutex_unlock(&philo->data->forks[0]), 1);
+		{
+			pthread_mutex_unlock(&philo->data->forks[0]);
+			return (pthread_mutex_unlock(&philo->data->forks[philo->id - 1]), 1);
+		}
+	}
+	else
+	{
+		pthread_mutex_lock(&philo->data->forks[philo->id]);
+		if (state(philo, 1))
+			return (pthread_mutex_unlock(&philo->data->forks[philo->id]), 1);
+		pthread_mutex_lock(&philo->data->forks[philo->id - 1]);
+		if (state(philo, 1))
+		{
+			pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
+			return (pthread_mutex_unlock(&philo->data->forks[philo->id]), 1);
+		}
 	}
 	return (0);
 }
@@ -96,20 +102,22 @@ void	*routine(void *arg)
 			< philo->data->t_must_eat) && !is_deadqm(philo))
 	{
 		if (philo->id % 2 && !(philo->nb_eated))
-			usleep(philo->data->t_eat * 1000);
+			ft_sleep(philo->data->t_eat, philo);
 		if (lock(philo))
 			return (NULL);
 		if (state(philo, 4))
 			return (NULL);
-		philo->last_eat = gettime() - philo->data->start;
 		pthread_mutex_lock(&philo->data->ate[philo->id - 1]);
+		philo->last_eat = gettime() - philo->data->start;
 		philo->nb_eated++;
+		if(ft_sleep(philo->data->t_eat, philo))
+			return (unlock(philo), pthread_mutex_unlock(&philo->data->ate[philo->id - 1]), NULL);
 		pthread_mutex_unlock(&philo->data->ate[philo->id - 1]);
-		usleep(philo->data->t_eat * 1000);
 		unlock(philo);
 		if (state(philo, 2))
 			return (NULL);
-		usleep(philo->data->t_sleep * 1000);
+		if (ft_sleep(philo->data->t_sleep, philo))
+			return (NULL);
 		if (state(philo, 3))
 			return (NULL);
 	}
