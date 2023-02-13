@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 14:49:21 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/10 19:43:43 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/13 03:17:43 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,5 +56,14 @@ int	ft_sleep(int to_wait, t_philo *philo)
 			return (1);
 		usleep(500);
 	}
+	return (0);
+}
+
+int	is_deadqm(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->data->dead_phil);
+	if (philo->data->is_dead)
+		return (pthread_mutex_unlock(&philo->data->dead_phil), 1);
+	pthread_mutex_unlock(&philo->data->dead_phil);
 	return (0);
 }

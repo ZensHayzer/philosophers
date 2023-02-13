@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 04:48:56 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/08 14:02:58 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/13 13:23:53 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	threads_start(t_data data)
 	{
 		data.philo_tab[i].data = &data;
 		data.philo_tab[i].id = i + 1;
-		data.philo_tab[i].nb_eated = 0;
+		data.philo_tab[i].nb_ate = 0;
 		data.philo_tab[i].p_thread = 0;
 		data.philo_tab[i].last_eat = 0;
 		pthread_create(&(data.philo_tab[i].p_thread), NULL, &routine,

@@ -6,37 +6,42 @@
 #    By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/01/30 20:34:23 by ajeanne           #+#    #+#              #
-#    Updated: 2023/02/08 18:50:10 by ajeanne          ###   ########.fr        #
+#    Updated: 2023/02/13 12:42:41 by ajeanne          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 NAME =		philo
 
-SRCS_DIR = $(shell find srcs -type d)
-INC_DIR = includes
+SRCS_DIR =	$(shell find srcs -type d)
+INC_DIR =	includes
 OBJS_DIR =	objects
 DEPS_DIR =	deps
 
 vpath %.c $(foreach dir, $(SRCS_DIR), $(dir):)
 
-OBJS = $(addprefix $(OBJS_DIR)/, $(SRCS:%.c=%.o))
+OBJS =	$(addprefix $(OBJS_DIR)/, $(SRCS:%.c=%.o))
 
-SRCS =		main.c			\
-			check_entry.c	\
-			init.c			\
-			init1.c			\
-			routine.c		\
-			dead_checker.c	\
-			threads_start.c	\
-			utils.c			\
-			free.c
+SRCS =	main.c				\
+		check_entry.c		\
+		init.c				\
+		init1.c				\
+		routine.c			\
+		routine_utils.c		\
+		dead_checker.c		\
+		threads_start.c		\
+		utils.c				\
+		free.c
 
-CC =		clang
-CFLAGS =	-Wall -Werror -Wextra -g3
-INCLUDES_FLAGS = $(addprefix -I,$(INC_DIR))
-DEPS_FLAGS = -MT $@ -MMD -MP -MF $(DEPS_DIR)/$*.d
-DEPS =		$(SRCS:%.c=$(DEPS_DIR)/%.d)
+CC =				clang
+CFLAGS =			-Wall -Werror -Wextra -g3
+INCLUDES_FLAGS =	$(addprefix -I,$(INC_DIR))
+DEPS_FLAGS =		-MT $@ -MMD -MP -MF $(DEPS_DIR)/$*.d
+DEPS =				$(SRCS:%.c=$(DEPS_DIR)/%.d)
+
+$(OBJS_DIR)/%.o: %.c | $(OBJS_DIR) $(DEPS_DIR)
+	@echo "Creating $@"
+	@-$(CC) $(CFLAGS) $(DEPS_FLAGS) $(INCLUDES_FLAGS) -c $< -o $@
 
 .PHONY: all
 all: $(NAME)
@@ -45,12 +50,6 @@ $(NAME): $(OBJS)
 	@echo "Compile $(NAME)"
 	@-$(CC) $(CFLAGS) $(OBJS) $(INCLUDES_FLAGS) -o $(NAME)
 	@echo "========      COMPLETE       ========"
-
-$(OBJS_DIR)/%.o: %.c $(OBJS_DIR) $(DEPS_DIR)
-	@echo "Creating $@"
-	@-$(CC) $(CFLAGS) $(DEPS_FLAGS) $(INCLUDES_FLAGS) -c $< -o $@
-
-$(DEPS):
 
 $(OBJS_DIR):
 	@echo "Creating $@"
@@ -71,7 +70,7 @@ clean:
 .PHONY: fclean
 fclean: clean
 	@echo "Deleting $(NAME)"
-	@rm -f $(NAME)
+	@-rm -f $(NAME)
 	@echo "========    COMPLETE    ========"
 
 .PHONY: re

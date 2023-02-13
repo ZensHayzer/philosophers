@@ -6,7 +6,7 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 12:14:05 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/08 18:55:58 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/13 06:10:36 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	init_philo(t_philo philo, t_data *data)
 {
 	philo.data = data;
 	philo.id = 0;
-	philo.nb_eated = 0;
+	philo.nb_ate = 0;
 	philo.p_thread = 0;
 	philo.last_eat = 0;
 	return (EXIT_SUCCESS);
@@ -69,7 +69,7 @@ int	init_philo_tab(t_data *data)
 		return (EXIT_FAILURE);
 	while (i < data->nb_philo)
 	{
-		if(init_philo(data->philo_tab[i], data))
+		if (init_philo(data->philo_tab[i], data))
 			return (1);
 		i++;
 	}
@@ -85,6 +85,8 @@ int	initialization(char **input, t_data *data)
 	if (init_philo_tab(data))
 		return (EXIT_FAILURE);
 	if (init_ate_mutex(data))
+		return (EXIT_FAILURE);
+	if (init_nb_ate_mutex(data))
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }

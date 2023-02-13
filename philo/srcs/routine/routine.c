@@ -6,91 +6,65 @@
 /*   By: ajeanne <ajeanne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 11:09:25 by ajeanne           #+#    #+#             */
-/*   Updated: 2023/02/11 00:47:22 by ajeanne          ###   ########.fr       */
+/*   Updated: 2023/02/13 13:28:06 by ajeanne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	unlock(t_philo *philo)
-{
-	if (philo->id == philo->data->nb_philo)
-	{
-		pthread_mutex_unlock(&philo->data->forks[0]);
-		pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
-	}
-	else
-	{
-		pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
-		pthread_mutex_unlock(&philo->data->forks[philo->id]);
-	}
-}
-
-int	state(t_philo *philo, int s)
+void	solo_philo(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->data->write);
-	pthread_mutex_lock(&philo->data->dead_phil);
-	if (philo->data->is_dead)
-	{
-		pthread_mutex_unlock(&philo->data->write);
-		return (pthread_mutex_unlock(&philo->data->dead_phil), 1);
-	}
-	pthread_mutex_unlock(&philo->data->dead_phil);
-	if (s == 1)
-		printf("%ld PHILOSOPHER %d TAKE A FORK\n",
+	printf("%ld %d has taken a fork\n",
+		(gettime() - philo->data->start), philo->id);
+	pthread_mutex_unlock(&philo->data->write);
+}
+
+int	routine_write(t_philo *philo, int state)
+{
+	pthread_mutex_lock(&philo->data->write);
+	if (is_deadqm(philo))
+		return (pthread_mutex_unlock(&philo->data->write), 1);
+	if (state == 1)
+		printf("%ld %d has taken a fork\n",
 			(gettime() - philo->data->start), philo->id);
-	else if (s == 2)
-		printf("%ld PHILOSOPHER %d IS SLEEPING\n",
+	else if (state == 2)
+		printf("%ld %d is eating\n",
 			(gettime() - philo->data->start), philo->id);
-	else if (s == 3)
-		printf("%ld PHILOSOPHER %d IS THINKING\n",
+	else if (state == 3)
+		printf("%ld %d is sleeping\n",
 			(gettime() - philo->data->start), philo->id);
-	else if (s == 4)
-		printf("%ld PHILOSOPHER %d IS EATING\n",
-			(gettime() - philo->data->start), philo->id);
-	else if (s == 5)
-		printf("%ld PHILOSOPHER %d IS DEAD\n",
+	else if (state == 4)
+		printf("%ld %d is thinking\n",
 			(gettime() - philo->data->start), philo->id);
 	pthread_mutex_unlock(&philo->data->write);
 	return (0);
 }
 
-int	is_deadqm(t_philo *philo)
+int	eating_step(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->data->dead_phil);
-	if (philo->data->is_dead)
-		return (pthread_mutex_unlock(&philo->data->dead_phil), 1);
-	pthread_mutex_unlock(&philo->data->dead_phil);
-	return (0);
-}
+	int	*eat_tab;
 
-int	lock(t_philo *philo)
-{
-	if (philo->id == philo->data->nb_philo)
-	{
-		pthread_mutex_lock(&philo->data->forks[philo->id - 1]);
-		if (state(philo, 1))
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id - 1]), 1);
-		pthread_mutex_lock(&philo->data->forks[0]);
-		if (state(philo, 1))
-		{
-			pthread_mutex_unlock(&philo->data->forks[0]);
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id - 1]), 1);
-		}
-	}
-	else
-	{
-		pthread_mutex_lock(&philo->data->forks[philo->id]);
-		if (state(philo, 1))
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id]), 1);
-		pthread_mutex_lock(&philo->data->forks[philo->id - 1]);
-		if (state(philo, 1))
-		{
-			pthread_mutex_unlock(&philo->data->forks[philo->id - 1]);
-			return (pthread_mutex_unlock(&philo->data->forks[philo->id]), 1);
-		}
-	}
-	return (0);
+	eat_tab = eating_init(philo);
+	if (!eat_tab)
+		return (1);
+	pthread_mutex_lock(&philo->data->forks[eat_tab[0]]);
+	if (routine_write(philo, 1))
+		return (eating_unlock(philo, 1, eat_tab));
+	pthread_mutex_lock(&philo->data->forks[eat_tab[1]]);
+	if (routine_write(philo, 1))
+		return (eating_unlock(philo, 2, eat_tab));
+	if (routine_write(philo, 2))
+		return (eating_unlock(philo, 2, eat_tab));
+	pthread_mutex_lock(&philo->data->ate[philo->id - 1]);
+	philo->last_eat = gettime() - philo->data->start;
+	pthread_mutex_unlock(&philo->data->ate[philo->id - 1]);
+	pthread_mutex_lock(&philo->data->nb_ate[philo->id - 1]);
+	philo->nb_ate++;
+	pthread_mutex_unlock(&philo->data->nb_ate[philo->id - 1]);
+	if (ft_sleep(philo->data->t_eat, philo))
+		return (eating_unlock(philo, 2, eat_tab));
+	return (eating_unlock(philo, 3, eat_tab));
 }
 
 void	*routine(void *arg)
@@ -98,27 +72,19 @@ void	*routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while ((philo->data->t_must_eat == -1 || philo->nb_eated
-			< philo->data->t_must_eat) && !is_deadqm(philo))
+	if (philo->data->nb_philo == 1)
+		return (solo_philo(philo), NULL);
+	if (philo->id % 2)
+		ft_sleep(philo->data->t_eat, philo);
+	while (!is_deadqm(philo))
 	{
-		if (philo->id % 2 && !(philo->nb_eated))
-			ft_sleep(philo->data->t_eat, philo);
-		if (lock(philo))
+		if (eating_step(philo))
 			return (NULL);
-		if (state(philo, 4))
-			return (NULL);
-		pthread_mutex_lock(&philo->data->ate[philo->id - 1]);
-		philo->last_eat = gettime() - philo->data->start;
-		philo->nb_eated++;
-		if(ft_sleep(philo->data->t_eat, philo))
-			return (unlock(philo), pthread_mutex_unlock(&philo->data->ate[philo->id - 1]), NULL);
-		pthread_mutex_unlock(&philo->data->ate[philo->id - 1]);
-		unlock(philo);
-		if (state(philo, 2))
+		if (routine_write(philo, 3))
 			return (NULL);
 		if (ft_sleep(philo->data->t_sleep, philo))
 			return (NULL);
-		if (state(philo, 3))
+		if (routine_write(philo, 4))
 			return (NULL);
 	}
 	return (NULL);
